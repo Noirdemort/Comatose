@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5CB3D7B724339A3B00BCFF1A /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB3D7B624339A3B00BCFF1A /* main.swift */; };
+		5CB3D7BE24339A4D00BCFF1A /* overlord.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5CB3D7BD24339A4D00BCFF1A /* overlord.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +26,7 @@
 /* Begin PBXFileReference section */
 		5CB3D7B324339A3B00BCFF1A /* comatose */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = comatose; sourceTree = BUILT_PRODUCTS_DIR; };
 		5CB3D7B624339A3B00BCFF1A /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		5CB3D7BD24339A4D00BCFF1A /* overlord.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = overlord.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +60,7 @@
 			isa = PBXGroup;
 			children = (
 				5CB3D7B624339A3B00BCFF1A /* main.swift */,
+				5CB3D7BD24339A4D00BCFF1A /* overlord.metal */,
 			);
 			path = comatose;
 			sourceTree = "<group>";
@@ -120,6 +123,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5CB3D7BE24339A4D00BCFF1A /* overlord.metal in Sources */,
 				5CB3D7B724339A3B00BCFF1A /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -243,6 +247,7 @@
 		5CB3D7BB24339A3B00BCFF1A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = GLBR3SXF68;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -254,6 +259,7 @@
 		5CB3D7BC24339A3B00BCFF1A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = GLBR3SXF68;
 				ENABLE_HARDENED_RUNTIME = YES;
