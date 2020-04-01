@@ -86,7 +86,7 @@ func simplePipeline(){
        
     let distributionBuffer: MTLBuffer = device.makeBuffer(bytes: dist, length: unitSize*dist.count, options: resourceOption)!
     
-    
+//    device.makeLibrary(filepath: <#T##String#>)
     let DPLibrary: MTLLibrary! = device.makeDefaultLibrary()
     let initDP = DPLibrary.makeFunction(name: "initialize")
     let pipelineFilterInit = try! device.makeComputePipelineState(function: initDP!)
