@@ -154,8 +154,67 @@ kernel void iterateX(const device uint *batch[[buffer(4)]],
 
     uint idCurrent = batch[0]*batch[1]+id;
     uint idParent = idCurrent - batch[0];
-    
+
 
     outVector[idCurrent] = parameters[idCurrent%12]*distribution[idParent%16];
 
+}
+
+
+
+//kernel void factorial_init(const device uint *batch[[buffer(1)]],
+//                       device int *init[[buffer(0)]],
+//                       uint id [[ thread_position_in_grid ]]){
+//
+//    uint idCurrent = batch[0]*batch[1]+id;
+//
+//    init[idCurrent] = 1;
+//}
+
+
+kernel void square_init(const device uint *batch[[buffer(1)]],
+                       device float *outVector [[buffer(0)]],
+                       uint id [[ thread_position_in_grid ]]) {
+
+
+    // find current and parent id
+    uint idCurrent = batch[0]*batch[1]+id;
+
+    outVector[idCurrent] = idCurrent + 1;
+}
+
+
+kernel void square_exec(const device uint *batch[[buffer(1)]],
+                            device float *outVector[[buffer(0)]],
+                            uint id [[ thread_position_in_grid ]]){
+    
+    uint idCurrent = batch[0]*batch[1]+id;
+    uint idParent = idCurrent - batch[0];
+
+    
+    outVector[idCurrent] = outVector[idCurrent]*outVector[idParent];
+    
+}
+
+
+// to test the understanding of thread related concepts
+kernel void testThread(device float *result [[ buffer(0) ]],
+                    uint id [[ thread_position_in_grid ]],
+                    uint i [[ thread_position_in_threadgroup ]],
+                    uint w [[ threadgroup_position_in_grid ]],
+                    uint S [[ threads_per_threadgroup ]]) {
+
+    if (id == w*S+i)
+        result[id] = id;
+    else
+        result[id] = 0;
+}
+
+
+
+float3 hsv2rgb(float h, float s, float v) {
+    float3 a = fract(h + float3(0.0, 2.0, 1.0)/3.0)*6.0-3.0;
+    a = clamp(abs(a) - 1.0, 0.0, 1.0) - 1.0;
+    a = a * s + 1.0;
+    return a * v;
 }

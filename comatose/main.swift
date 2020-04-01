@@ -210,4 +210,130 @@ func simplePipeline(){
 }
 
 
-simplePipeline()
+func squareFactory() {
+    let device: MTLDevice! = MTLCreateSystemDefaultDevice()
+        
+    let commandQueue: MTLCommandQueue! = device.makeCommandQueue()
+
+    _ = commandQueue.makeCommandBuffer()
+    
+        
+    let start = Date()
+
+        
+    let K = 150
+    let L = 1
+            
+    let unitSize = MemoryLayout<Float>.size
+    let resultBufferSize = K*unitSize
+        
+    let resourceOption = MTLResourceOptions()
+        
+    let buffer: MTLBuffer = device.makeBuffer(length: resultBufferSize, options: resourceOption)!
+
+    
+    let threadExecutionWidth = 512
+        
+        
+    let numThreadsPerGroup = MTLSize(width:threadExecutionWidth, height: 1, depth: 1)
+
+               
+    let DPLibrary: MTLLibrary! = device.makeDefaultLibrary()
+    
+    let initDP = DPLibrary.makeFunction(name: "square_init")
+    let pipelineFilterInit = try! device.makeComputePipelineState(function: initDP!)
+    
+    let iterateSquare = DPLibrary.makeFunction(name: "square_exec")
+    let pipelineFilterSquare = try! device.makeComputePipelineState(function: iterateSquare!)
+        
+        
+     for l in 1...L {
+
+           let batchSize:uint = 1
+           let numGroupsBatch = MTLSize(width:(Int(batchSize)+threadExecutionWidth-1)/threadExecutionWidth, height: 1, depth: 1)
+           
+            print("Batch Size = ", batchSize)
+           
+           for batchIndex in 1..<uint(K) {
+               
+               let dispatchIterator: [uint] = [batchSize-1, batchIndex]
+               let dispatchBuffer: MTLBuffer = device.makeBuffer(bytes: dispatchIterator, length: MemoryLayout<uint>.size*dispatchIterator.count, options: resourceOption)!
+               
+               let commandBufferInitDP: MTLCommandBuffer! = commandQueue.makeCommandBuffer()
+               let encoderInitDP = commandBufferInitDP.makeComputeCommandEncoder()
+
+               encoderInitDP!.setComputePipelineState(pipelineFilterInit)
+
+               encoderInitDP!.setBuffer(buffer, offset: 0, index: 0)
+               encoderInitDP!.setBuffer(dispatchBuffer, offset: 0, index: 1)
+
+               encoderInitDP!.dispatchThreadgroups(numGroupsBatch, threadsPerThreadgroup: numThreadsPerGroup)
+               encoderInitDP!.endEncoding()
+               commandBufferInitDP.commit()
+               commandBufferInitDP.waitUntilCompleted()
+           }
+       }
+    
+    
+    for l in 0...L {
+        var batchSize: uint = 1
+        var batchNum: uint = 1
+        var batchStart: uint = 0
+        if l>0 {
+            batchSize = uint(pow(Float(K),Float(l)))
+            batchStart = 1
+            batchNum = uint(K)
+        }
+        print("Batch size: \(batchSize)")
+        let numGroupsBatch = MTLSize(width:(Int(batchSize)+threadExecutionWidth-1)/threadExecutionWidth, height:1, depth:1)
+
+        for batchIndex in batchStart..<batchNum {
+
+            let dispatchIterator: [uint] = [batchSize-1, batchIndex]
+            let dispatchBuffer:MTLBuffer = device.makeBuffer(bytes: dispatchIterator, length: MemoryLayout<uint>.size*dispatchIterator.count, options: resourceOption)!
+
+            let commandBufferIterateDP: MTLCommandBuffer! = commandQueue.makeCommandBuffer()
+            let encoderIterateDP = commandBufferIterateDP.makeComputeCommandEncoder()
+
+            encoderIterateDP!.setComputePipelineState(pipelineFilterSquare)
+
+            encoderIterateDP!.setBuffer(buffer, offset: 0, index: 0)
+            encoderIterateDP!.setBuffer(dispatchBuffer, offset: 0, index: 1)
+
+            encoderIterateDP!.dispatchThreadgroups(numGroupsBatch, threadsPerThreadgroup: numThreadsPerGroup)
+            encoderIterateDP!.endEncoding()
+            commandBufferIterateDP.commit()
+            commandBufferIterateDP.waitUntilCompleted()
+
+        }
+    }
+    
+
+        
+    // Get data from device
+    let data = Data(bytesNoCopy: buffer.contents(), count: resultBufferSize, deallocator: .unmap)
+        
+    
+    let finalResultArray: UnsafeMutableBufferPointer<Float> = UnsafeMutableBufferPointer.allocate(capacity: K)
+        
+    defer {
+        finalResultArray.deallocate()
+    }
+        
+    _ = data.copyBytes(to: finalResultArray)
+
+    print(finalResultArray)
+
+    finalResultArray.forEach({val in
+        print(val)
+    })
+      
+    let end = Date()
+    print("The time elapsed is ", Double(end.timeIntervalSince(start)))
+        
+}
+
+
+//simplePipeline()
+squareFactory()
+
